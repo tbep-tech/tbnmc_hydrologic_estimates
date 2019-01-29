@@ -1,0 +1,95 @@
+---
+title: "Develop Bay Segment Hydrologic Estimates & Adjustment Factors"
+author: "Ed Sherwood"
+date: "January 17, 2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(dataRetrieval)
+library(rnoaa)
+library(purrr)
+library(tidyverse)
+
+start <- "2018-01-01"
+end <- "2018-12-31"
+
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Download NOAA UWS Rainfall Station Data
+Note that this requires you to have a NOAA api key to download the data. Set this option in your .Rprofile or .Renviron file.
+
+```{r rainfall}
+
+stations <- c('GHCND:USW00092806', 'GHCND:USW00012842')
+
+sp_rainfall <- ncdc(datasetid = "GHCND", stationid = "GHCND:USW00092806", 
+                    datatypeid = "PRCP", startdate = start, enddate = end,
+                    limit = 500, add_units = TRUE)
+sp_rain <- sp_rainfall$data %>% 
+            summarise(sum = sum(value)/254)
+
+tia_rainfall <- ncdc(datasetid = "GHCND", stationid = "GHCND:USW00012842", 
+                    datatypeid = "PRCP", startdate = start, enddate = end,
+                    limit = 500, add_units = TRUE)
+tia_rain <- tia_rainfall$data %>% 
+            summarise(sum = sum(value)/254)
+
+```
+
+
+## Download USGS Streamflow data
+
+```{r streamflow}
+hr <- readNWISdv("02303000", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(hr_flow = mean(Flow)*0.892998604)
+ar <- readNWISdv("02301500", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(ar_flow = mean(Flow)*0.892998604)
+lmr<- readNWISdv("02300500", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(lmr_flow = mean(Flow)*0.892998604)
+bkr<- readNWISdv("02307359", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(bkr_flow = mean(Flow)*0.892998604)
+wl <- readNWISdv("02300042", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(wl_flow = mean(Flow)*0.892998604)
+mr <- readNWISdv("02299950", "00060", start, end) %>% 
+      renameNWISColumns() %>% 
+      summarise(mr_flow = mean(Flow)*0.892998604)
+```
+
+## Bay Segment Annual Estimate 
+
+Annual hydrologic adjustment factor results by bay segment, based upon regressions developed in [TBEP Technical Publication #03-16](https://tbeptech.org/TBEP_TECH_PUBS/2016/TBEP_03_16_TBNMC_Tech_Memo_Update_LTB_Hyd_Tool.pdf).
+
+```{r hydro_estimate}
+HB <- data.frame(bs="Hillsborough Bay") 
+HB$est <- 197.08+(1.84*ar$ar_flow)+(1.91*hr$hr_flow) 
+HB$adj <- ifelse(HB$est>753 & HB$est<1110,"NO", "YES")
+HB$factor <- ifelse(HB$adj=="YES",HB$est/908,NA)
+HB$compload <- ifelse(HB$adj=="YES",HB$factor*1451,1451)
+
+OTB <- data.frame(bs="Old Tampa Bay") 
+OTB$est <- 154.22+(8.12*bkr$bkr_flow)+(6.73*tia_rain$sum) 
+OTB$adj <- ifelse(OTB$est>383 & OTB$est<548,"NO", "YES")
+OTB$factor <- ifelse(OTB$adj=="YES",OTB$est/449,NA)
+OTB$compload <- ifelse(OTB$adj=="YES",OTB$factor*486,486)
+
+MTB <- data.frame(bs="Middle Tampa Bay") 
+MTB$est <- -13.78+(1.64*lmr$lmr_flow)+(8.68*sp_rain$sum) 
+MTB$adj <- ifelse(MTB$est>524 & MTB$est<756,"NO", "YES")
+MTB$factor <- ifelse(MTB$adj=="YES",MTB$est/646,NA)
+MTB$compload <- ifelse(MTB$adj=="YES",MTB$factor*799,799)
+
+LTB <- data.frame(bs="Lower Tampa Bay") 
+LTB$est <- 87.08+(3.69*sp_rain$sum)+(0.79*wl$wl_flow)+(0.62*mr$mr_flow) 
+LTB$adj <- ifelse(LTB$est>312 & LTB$est<402,"NO", "YES")
+LTB$factor <- ifelse(LTB$adj=="YES",LTB$est/361,NA)
+LTB$compload <- ifelse(LTB$adj=="YES",LTB$factor*349,349)
+
+TB <- bind_rows(HB,OTB,MTB,LTB)
+
+```
