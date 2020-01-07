@@ -11,8 +11,8 @@ library(rnoaa)
 library(purrr)
 library(tidyverse)
 
-start <- "2018-01-01"
-end <- "2018-12-31"
+start <- "2019-01-01"
+end <- "2019-12-31"
 
 knitr::opts_chunk$set(echo = TRUE)
 ```
