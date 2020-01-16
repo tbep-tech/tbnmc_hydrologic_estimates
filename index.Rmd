@@ -29,13 +29,13 @@ tabsel <- reactive({
    
    totab <- yrests %>% 
       filter(year == yrsel) %>% 
-      select(-year) %>% 
+      select(-year, -compload) %>% 
       rename(
          `Bay segment` = bs, 
          `Hydrology estimate (mill m3)` = est, 
          Adjustment = adj, 
-         `Compliance load adjustment factor` = factor, 
-         `Compliance load` = compload
+         `Compliance load adjustment factor` = factor#, 
+         # `Compliance load` = compload
       )
 
    # tabular output
