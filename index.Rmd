@@ -18,7 +18,7 @@ library(kableExtra)
 # writeLines(styles, 'styles.css')
 
 data(yrests)
-yrs <- unique(yrests$year)
+yrs <- unique(yrests$Year)
 ```
 
 ```{r reactive}
@@ -28,15 +28,8 @@ tabsel <- reactive({
    yrsel <- input$yrsel
    
    totab <- yrests %>% 
-      filter(year == yrsel) %>% 
-      select(-year, -compload) %>% 
-      rename(
-         `Bay segment` = bs, 
-         `Hydrology estimate (mill m3)` = est, 
-         Adjustment = adj, 
-         `Compliance load adjustment factor` = factor#, 
-         # `Compliance load` = compload
-      )
+      filter(Year == yrsel) %>% 
+      select(-Year, -`Compliance Load`) 
 
    # tabular output
    out <- HTML(knitr::kable(totab, format = 'html', digits = 2) %>% 
