@@ -48,7 +48,7 @@ column(12,
 )
 ```
 
-`r renderText(input$yrsel)` annual hydrologic adjustment factor results by bay segment, based upon regressions developed in [TBEP Technical Publication #03-16](https://tbeptech.org/TBEP_TECH_PUBS/2016/TBEP_03_16_TBNMC_Tech_Memo_Update_LTB_Hyd_Tool.pdf).
+`r renderText(input$yrsel)` annual hydrologic adjustment factor results by bay segment, based upon regressions developed in [TBEP Technical Publication #03-16](https://drive.google.com/file/d/11NT0NQ2WbPO6pVZaD7P7Z6qjcwO1jxHw/view).
    
 ```{r, results = 'asis'}
 renderUI(tabsel())
