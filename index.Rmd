@@ -1,10 +1,11 @@
 ---
-title: "<h2>Bay Segment Hydrologic Estimates & Adjustment Factors</h2>"
 output: 
   html_document:
       css: styles.css
 runtime: shiny
 ---
+
+## Bay Segment Hydrologic Estimates & Adjustment Factors
 
 ```{r, warning = F, message = F, echo = F}
 knitr::opts_chunk$set(echo = TRUE, warning = F, message = F, echo = F)
