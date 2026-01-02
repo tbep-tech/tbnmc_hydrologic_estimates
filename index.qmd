@@ -1,5 +1,4 @@
 ---
-title: "Bay Segment Hydrologic Estimates & Adjustment Factors"
 format: 
     html:
         css: styles.css
@@ -9,6 +8,8 @@ execute:
     message: false
     warning: false
 ---
+
+## Bay Segment Hydrologic Estimates & Adjustment Factors
 
 ```{r}
 #| context: server
