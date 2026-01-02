@@ -1,0 +1,52 @@
+---
+title: "Bay Segment Hydrologic Estimates & Adjustment Factors"
+format: 
+    html:
+        css: styles.css
+server: shiny
+execute:
+    echo: false
+    message: false
+    warning: false
+---
+
+```{r}
+#| context: server
+load(file = here::here('data', 'yrests.RData'))
+tabsel <- reactive({
+   
+   # input 
+   yrsel <- input$yrsel
+   
+   totab <- yrests |> 
+      dplyr::filter(Year == yrsel) |>
+      dplyr::select(-Year, -`Compliance Load`) 
+
+   # tabular output
+   out <- HTML(knitr::kable(totab, format = 'html', digits = 2) |> 
+      kableExtra::kable_styling(full_width = T, font_size = 14))
+   
+   return(out)
+   
+})
+
+output$yrtxt <- renderText(input$yrsel)
+output$tabsel <- renderUI(tabsel())
+```
+
+```{r}
+load(file = here::here('data', 'yrests.RData'))
+yrs <- unique(yrests$Year)
+column(12, 
+       column(4, 
+              selectInput('yrsel', 'Select year:', choices = yrs, selected = max(yrs))
+       )
+)
+```
+
+`r textOutput('yrtxt', inline = T)` annual hydrologic adjustment factor results by bay segment, based upon regressions developed in [TBEP Technical Publication #03-16](https://drive.google.com/file/d/11NT0NQ2WbPO6pVZaD7P7Z6qjcwO1jxHw/view). Results are considered draft and may change with updates to USGS flow and rainfall data.  Consult the [annual compliance assessment reports](https://tbep.org/our-work/library/?table_filter=compliance){target="_blank"} for applicable load adjustment estimates.
+   
+```{r}
+#| results: asis
+uiOutput("tabsel")
+```
